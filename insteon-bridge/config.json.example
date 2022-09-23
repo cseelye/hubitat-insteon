@@ -1,0 +1,44 @@
+{
+  "name": "My Hub",
+  "username": "[Insteon Hub Username]",
+  "password": "[Insteon Hub Password",
+  "host": "[Insteon Hub IP Address]",
+  "model": "2245",
+  "devices": [
+    {
+      "name": "Bedroom Lamp",
+      "deviceID": "[Insteon Device ID]",
+      "deviceType": "dimmer"
+    },
+    {
+      "name": "Backyard Floods",
+      "deviceID": "[Insteon Device ID]",
+      "deviceType": "switch"
+    },
+    {
+      "name": "Dining Room Light",
+      "deviceID": "[Insteon Device ID]",
+      "deviceType": "lightbulb"
+    },
+    {
+      "name": "Closet Door",
+      "deviceID": "[Insteon Device ID]",
+      "deviceType": "contactsensor"
+    },
+    {
+      "name": "Basement Leak Sensor",
+      "deviceID": "[Insteon Device ID]",
+      "deviceType": "leaksensor"
+    },
+    {
+      "name": "ioLinc",
+      "deviceID": "[Insteon Device ID]",
+      "deviceType": "lightbulb"
+    },
+    {
+      "name": "Keypad",
+      "deviceID": "[Insteon Device ID]",
+      "deviceType": "scene"
+    }
+  ]
+}

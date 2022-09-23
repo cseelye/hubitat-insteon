@@ -1,0 +1,26 @@
+{
+  "name": "insteon-bridge",
+  "version": "1.0.0",
+  "description": "Provide control and status of Insteon devices over websockets",
+  "main": "insteon-bridge.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/cseelye/hubitat-insteon.git"
+  },
+  "author": "Carl Seelye <cseelye@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cseelye/hubitat-insteon/issues"
+  },
+  "homepage": "https://github.com/cseelye/hubitat-insteon#readme",
+  "dependencies": {
+    "debug": "^4.3.4",
+    "fs": "^0.0.1-security",
+    "home-controller": "^0.9.2",
+    "log-timestamp": "^0.3.0",
+    "ws": "^8.9.0"
+  }
+}
