@@ -1,0 +1,8 @@
+cs.insteon
+Insteon Bridge
+library cs.helpers.groovy
+driver cs.insteon.InsteonParentDevice.groovy
+driver cs.insteon.InsteonDimmerSwitch.groovy
+driver cs.insteon.InsteonOnOffSwitch.groovy
+driver cs.insteon.InsteonContactSensor.groovy
+driver cs.insteon.InsteonLeakSensor.groovy

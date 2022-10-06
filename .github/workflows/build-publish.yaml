@@ -1,0 +1,198 @@
+name: Build and release
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - 'main'
+
+jobs:
+  create_artifacts:
+    runs-on: ubuntu-latest
+    env:
+      BASE_BUNDLE_NAME: InsteonBridgeDrivers-
+      BASE_SERVER_NAME: insteon-bridge-server-
+
+    steps:
+
+    - name: Check out the repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set artifact names
+      run: |
+        echo "GITHUB_REF=${GITHUB_REF}"
+        if [[ ${GITHUB_REF_NAME} == "main" ]]; then
+            echo HUBITAT_BUNDLE="${BASE_BUNDLE_NAME}prerelease.zip" >> $GITHUB_ENV
+            echo SERVER_ARCHIVE="${BASE_SERVER_NAME}prerelease.zip" >> $GITHUB_ENV
+            echo CONTAINER_TAG="prerelease" >> $GITHUB_ENV
+            echo CONTAINER_FLAVOR="" >> $GITHUB_ENV
+            echo CHANGELOG_VERSION="Unreleased" >> $GITHUB_ENV
+        elif [[ ${GITHUB_REF} == refs/tags/* ]]; then
+            echo HUBITAT_BUNDLE="${BASE_BUNDLE_NAME}${GITHUB_REF_NAME}.zip" >> $GITHUB_ENV
+            echo CONTAINER_TAG="${GITHUB_REF_NAME}" >> $GITHUB_ENV
+            echo CONTAINER_FLAVOR="latest=true" >> $GITHUB_ENV
+            echo SERVER_ARCHIVE="${BASE_SERVER_NAME}${GITHUB_REF_NAME}.zip" >> $GITHUB_ENV
+            echo CHANGELOG_VERSION="${GITHUB_REF_NAME}" >> $GITHUB_ENV
+        else
+            exit 1
+        fi
+
+    - name: Parse changelog
+      id: changelog
+      uses: mindsers/changelog-reader-action@v2
+      with:
+        version: "${{env.CHANGELOG_VERSION}}"
+        validation_level: warn
+
+    - name: Changelog
+      run: |
+        echo "version=${{ steps.changelog.outputs.version }}"
+        echo "date=${{ steps.changelog.outputs.date }}"
+        echo "status=${{ steps.changelog.outputs.status }}"
+        echo "changes=${{ steps.changelog.outputs.changes }}"
+
+##-----------------------------------------------------------------------------
+## Create the zipfile artifacts
+##-----------------------------------------------------------------------------
+    - name: Create hubitat bundle
+      run: |
+        zip -j ${HUBITAT_BUNDLE} hubitat-drivers/cs.* bundle/*
+
+    - name: Create bridge server archive
+      run: |
+        zip -j ${SERVER_ARCHIVE} insteon-bridge-server/*
+
+##-----------------------------------------------------------------------------
+## Build/push the container image
+##-----------------------------------------------------------------------------
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Log in to Github Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create tags/labels for docker image
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: |
+          ${{ github.repository }}
+          ghcr.io/${{ github.repository }}
+        tags: |
+          type=raw,value=${{ env.CONTAINER_TAG }}
+        flavor: ${{ env.CONTAINER_FLAVOR }}
+        labels: |
+          org.opencontainers.image.description=Websocket server to connect Insteon to Hubitat
+
+    - name: Build and push docker images
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        file: container/Dockerfile
+        platforms: linux/amd64,linux/arm64,linux/arm/v7
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+##-----------------------------------------------------------------------------
+## Create "prerelease" tag and "Latest Prerelease" release for push to main
+##-----------------------------------------------------------------------------
+    # Move the "prerelease" tag to point to the last commit
+    - name: Advance prerelease tag
+      if: "! startsWith(github.ref, 'refs/tags/')"
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          try {
+              await github.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: "tags/prerelease"
+              })
+          } catch (e) {
+            console.log("The prerelease tag doesn't exist: " + e)
+          }
+          await github.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: "refs/tags/prerelease",
+            sha: context.sha
+          })
+
+    # Get the latest versioned tag, and then get the list of changes from that to HEAD
+    - name: Get prerelease list of changes
+      if: "! startsWith(github.ref, 'refs/tags/')"
+      id: commit_list
+      run: |
+        latest_ver=$(git tag --list 'v*' | sort -uVr | head -n1)
+        echo "latest_ver=${latest_ver}"
+        if [[ -z ${latest_ver} ]]; then
+            commit_list=$(git log --pretty="format:%h: %s" | sed 's/^/* /')
+        else
+            commit_list=$(git log ${latest_ver}..HEAD --pretty="format:%h: %s" | sed 's/^/* /')
+        fi
+        commit_list="${commit_list//'%'/'%25'}"
+        commit_list="${commit_list//$'\n'/'%0A'}"
+        commit_list="${commit_list//$'\r'/'%0D'}"
+        echo "::set-output name=commits::${commit_list}"
+
+    # Create prerelease
+    - name: Create prerelease
+      if: "! startsWith(github.ref, 'refs/tags/')"
+      uses: softprops/action-gh-release@cd28b0f5ee8571b76cfdaa62a30d51d752317477
+      with:
+        tag_name: prerelease
+        prerelease: true
+        name: Latest Prerelease
+        draft: false
+        fail_on_unmatched_files: true
+        files: |
+          ${{ env.HUBITAT_BUNDLE }}
+          ${{ env.SERVER_ARCHIVE }}
+        body: |
+          ## Commits
+          ${{ steps.commit_list.outputs.commits }}
+          ## Changelog
+          ${{ steps.changelog.outputs.changes }}
+          ## Container Images
+          Bridge server: https://github.com/cseelye/hubitat-insteon/pkgs/container/hubitat-insteon  
+          `docker pull ghcr.io/cseelye/hubitat-insteon:${{env.CONTAINER_TAG}}`
+
+##-----------------------------------------------------------------------------
+## Create versioned release for push to a vX.Y.X tag
+##-----------------------------------------------------------------------------
+    # Create tagged release if this push is a new tag
+    - name: Create release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@cd28b0f5ee8571b76cfdaa62a30d51d752317477
+      with:
+        tag_name:  ${{ github.ref_name }}
+        prerelease: false
+        name: Release ${{ github.ref_name }}
+        draft: false
+        fail_on_unmatched_files: true
+        files: |
+          ${{ env.HUBITAT_BUNDLE }}
+          ${{ env.SERVER_ARCHIVE }}
+        body: |
+          ## Changelog
+          ${{ steps.changelog.outputs.changes }}
+          ## Container Images
+          Bridge server: https://github.com/cseelye/hubitat-insteon/pkgs/container/hubitat-insteon  
+          `docker pull ghcr.io/cseelye/hubitat-insteon:${{env.CONTAINER_TAG}}`
