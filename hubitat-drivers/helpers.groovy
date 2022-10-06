@@ -1,8 +1,8 @@
 library (
-  author: 'cseelye',
+  author: 'Carl Seelye',
   description: 'Utility functions',
-  name: 'util',
-  namespace: 'cjs'
+  name: 'helpers',
+  namespace: 'cs'
 )
 
 // Dump info about an object to debug log
@@ -36,7 +36,7 @@ void dumpObj(String name, Object var) {
 }
 
 // Get the name of the function that called a logging function (debug, info, warn, error)
-String getCaller(String className='user_driver_cjs_Insteon', int offset=4) {
+String getCaller(String className='user_driver_cs_insteon_Insteon', int offset=4) {
     try {
         marker = new Throwable()
         filtered = []

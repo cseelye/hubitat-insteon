@@ -3,7 +3,7 @@
  */
 
 metadata {
-    definition(name: 'Insteon On/Off Switch', namespace: 'cjs', author: 'Carl Seelye') {
+    definition(name: 'Insteon On/Off Switch', namespace: 'cs.insteon', author: 'Carl Seelye') {
         capability 'Switch'
         capability 'Refresh'
 
@@ -19,7 +19,7 @@ metadata {
     }
 }
 
-#include cjs.util
+#include cs.helpers
 
 void installed() {
     refresh()

@@ -6,7 +6,7 @@ allowedRampRates = [480,420,360,300,270,240,210,180,150,120,90,60,47,43,38.5,
                     34,32,30,28,26,23.5,21.5,19,8.5,6.5,4.5,2,0.5,0.3,0.2,0.1]
 
 metadata {
-    definition(name: 'Insteon Dimmer Switch', namespace: 'cjs', author: 'Carl Seelye') {
+    definition(name: 'Insteon Dimmer Switch', namespace: 'cs.insteon', author: 'Carl Seelye') {
         capability 'Switch'
         capability "SwitchLevel"
         capability 'Refresh'
@@ -49,7 +49,7 @@ metadata {
     }
 }
 
-#include cjs.util
+#include cs.helpers
 
 void installed() {
     refresh()

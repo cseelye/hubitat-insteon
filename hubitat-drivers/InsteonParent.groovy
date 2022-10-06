@@ -11,7 +11,7 @@ import groovy.json.JsonException
 import groovy.json.JsonOutput
 
 metadata {
-    definition(name: 'Insteon Parent Device', namespace: 'cjs', author: 'Carl Seelye') {
+    definition(name: 'Insteon Parent Device', namespace: 'cs.insteon', author: 'Carl Seelye') {
         capability 'Initialize'
         capability 'Refresh'
 
@@ -74,7 +74,7 @@ metadata {
     }
 }
 
-#include cjs.util
+#include cs.helpers
 
 /*
  * Called when device is first created.
@@ -113,6 +113,7 @@ void refresh() {
  * Since we cannot know what changed in the settings, reinitialize everything.
  */
 void updated() {
+    info "updated"
     initialize()
 }
 
@@ -191,7 +192,7 @@ void parse(String description) {
 void connectWebsocket() {
     try {
         url = "ws://${settings.bridgeIP}:${settings.bridgePort}"
-        debug "Attempting connect to insteon-bridge ${url}"
+        info "Attempting connect to insteon-bridge ${url}"
         interfaces.webSocket.connect(url, pingInterval: 30)
     }
     catch (Exception ex) {
@@ -280,7 +281,7 @@ void onDeviceInfo(info) {
  */
 void onDeviceList(deviceList) {
     // Why is namespace sometimes null?
-    namespace = namespace ?: 'cjs'
+    namespace = namespace ?: 'cs.insteon'
 
     //  Refresh cache if requested
     if (state.forceRefreshCache){

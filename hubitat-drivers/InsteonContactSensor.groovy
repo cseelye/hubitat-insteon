@@ -3,7 +3,7 @@
  */
 
 metadata {
-    definition(name: 'Insteon Contact Sensor', namespace: 'cjs', author: 'Carl Seelye') {
+    definition(name: 'Insteon Contact Sensor', namespace: 'cs.insteon', author: 'Carl Seelye') {
         capability 'Contact Sensor'
 
         attribute 'contact', 'enum', ['open', 'closed']
