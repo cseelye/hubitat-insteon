@@ -163,6 +163,9 @@ function InsteonBridge() {
         devices[devConfig.deviceID].deviceID = devConfig.deviceID
         devices[devConfig.deviceID].name = devConfig.name
         devices[devConfig.deviceID].deviceType = devConfig.deviceType
+        devices[devConfig.deviceID].isDimmable = function() {
+            return ["lightbulb", "dimmer"].includes(this.deviceType)
+        }
     })
 
     // Create a message string
@@ -354,7 +357,7 @@ function InsteonBridge() {
                     case "deviceInfo":
                         device.info().then(function(info){
                             info["deviceID"] = request.params.deviceID
-                            if(!["lightbulb", "dimmer"].includes(device.deviceType)) {
+                            if (!device.isDimmable()) {
                                 delete info["rampRate"]
                                 delete info["onLevel"]
                             }
@@ -373,7 +376,7 @@ function InsteonBridge() {
                         if (request.params.rate == null) request.params.rate = undefined
                         device.turnOff(request.params.rate).then(function(cmdStatus){
                             if (cmdStatus.success) {
-                                if (["dimmer", "lightbulb"].includes(device.deviceType)) {
+                                if (device.isDimmable()) {
                                     // The rampRate can be several seconds or even minutes and immediately sending an event with the
                                     // level will only report how much the light has turned off so far. So, get the ramp rate from
                                     // the device and set a timer to poll the status until the ramp rate or expected level
@@ -401,7 +404,7 @@ function InsteonBridge() {
                         if (request.params.rate == null) request.params.rate = undefined
                         device.turnOn(request.params.level, request.params.rate).then(function(cmdStatus) {
                             if (cmdStatus.success) {
-                                if (["dimmer", "lightbulb"].includes(device.deviceType)) {
+                                if (device.isDimmable()) {
                                     // The rampRate can be several seconds or even minutes and immediately sending an event with the
                                     // level will only report how much the light has turned on so far. We could cheat and send an
                                     // event with the expected level, assuming the light will get there eventually, but this function
@@ -462,7 +465,7 @@ function InsteonBridge() {
                         break
 
                     case "deviceSetRampRate":
-                        if (!["lightbulb", "dimmer"].includes(device.deviceType)) {
+                        if (device.isDimmable()) {
                             sendResponse({"message":"Cannot set rampRate on non-dimmable device"}, "error")
                             break
                         }
@@ -479,7 +482,7 @@ function InsteonBridge() {
                         break
 
                     case "deviceSetOnLevel":
-                        if (!["lightbulb", "dimmer"].includes(device.deviceType)) {
+                        if (device.isDimmable()) {
                             sendResponse({"message":"Cannot set onLevel on non-dimmable device"}, "error")
                             break
                         }
@@ -496,7 +499,7 @@ function InsteonBridge() {
                         break
 
                     case "deviceSetLevel":
-                        if (!["lightbulb", "dimmer"].includes(device.deviceType)) {
+                        if (device.isDimmable()) {
                             sendResponse({"message":"Cannot set level on non-dimmable device"}, "error")
                             break
                         }
