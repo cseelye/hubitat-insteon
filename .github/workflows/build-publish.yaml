@@ -98,6 +98,7 @@ jobs:
           type=raw,value=${{ env.CONTAINER_TAG }}
         flavor: ${{ env.CONTAINER_FLAVOR }}
         labels: |
+          org.opencontainers.image.title=${{ env.CONTAINER_IMAGE_NAME }}
           org.opencontainers.image.description=Websocket server to connect Insteon to Hubitat
 
     - name: Build and push docker images
@@ -172,8 +173,8 @@ jobs:
           ## Changelog
           ${{ steps.changelog.outputs.changes }}
           ## Container Images
-          Bridge server: https://github.com/cseelye/hubitat-insteon/pkgs/container/hubitat-insteon  
-          `docker pull ghcr.io/cseelye/hubitat-insteon:${{env.CONTAINER_TAG}}`
+          Bridge server: https://github.com/cseelye/hubitat-insteon/pkgs/${{ env.CONTAINER_IMAGE_NAME }}  
+          `docker pull ghcr.io/cseelye/${{ env.CONTAINER_IMAGE_NAME }}:${{env.CONTAINER_TAG}}`
 
 ##-----------------------------------------------------------------------------
 ## Create versioned release for push to a vX.Y.X tag
@@ -195,5 +196,5 @@ jobs:
           ## Changelog
           ${{ steps.changelog.outputs.changes }}
           ## Container Images
-          Bridge server: https://github.com/cseelye/hubitat-insteon/pkgs/container/hubitat-insteon  
-          `docker pull ghcr.io/cseelye/hubitat-insteon:${{env.CONTAINER_TAG}}`
+          Bridge server: https://github.com/cseelye/hubitat-insteon/pkgs/container/${{ env.CONTAINER_IMAGE_NAME }}  
+          `docker pull ghcr.io/cseelye/${{ env.CONTAINER_IMAGE_NAME }}:${{env.CONTAINER_TAG}}`
