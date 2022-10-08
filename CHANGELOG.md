@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2022-10-08
 ### Fixed
 * Contact and Leak sensors not being created correctly
+* Container base image not compatible with ARM
 ### Changed
 * Container name is specific to bridge
 
