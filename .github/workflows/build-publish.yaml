@@ -154,13 +154,6 @@ jobs:
         commit_list="${commit_list//$'\r'/'%0D'}"
         echo "::set-output name=commits::${commit_list}"
 
-    # Delete the old prerelease
-    - name: Delete previous prerelease
-      if: "! startsWith(github.ref, 'refs/tags/')"
-      uses: cb80/delrel@v0.11.0
-      with:
-        tag: prerelease
-
     # Create prerelease
     - name: Create prerelease
       if: "! startsWith(github.ref, 'refs/tags/')"
@@ -182,6 +175,13 @@ jobs:
           ## Container Images
           Bridge server: https://github.com/cseelye/hubitat-insteon/pkgs/${{ env.CONTAINER_IMAGE_NAME }}  
           `docker pull ghcr.io/cseelye/${{ env.CONTAINER_IMAGE_NAME }}:${{env.CONTAINER_TAG}}`
+
+    # Cleanup any drafts left from the previous action
+    - name: Cleanup release drafts
+      if: "! startsWith(github.ref, 'refs/tags/')"
+      uses: hugo19941994/delete-draft-releases@v1.0.0
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 ##-----------------------------------------------------------------------------
 ## Create versioned release for push to a vX.Y.X tag
