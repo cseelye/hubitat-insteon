@@ -300,18 +300,18 @@ void onDeviceList(deviceList) {
             switch (dev.deviceType)
             {
                 case 'motionsensor':
-                    type = 'Insteon Motion Child'; break
+                    type = 'Insteon Motion Sensor'; break
                 case 'doorsensor':
                 case 'windowsensor':
                 case 'contactsensor':
-                    type = 'Insteon Contact Child'; break
+                    type = 'Insteon Contact Sensor'; break
                 case 'dimmer':
                 case 'lightbulb':
                     type = 'Insteon Dimmer Switch'; break
                 case 'switch':
                     type = 'Insteon On/Off Switch'; break
                 case 'leaksensor':
-                    type = 'Insteon Leak Child'; break
+                    type = 'Insteon Leak Sensor'; break
                 default:
                     warn "Unknown deviceType: ${dev.deviceType}"
                     return
