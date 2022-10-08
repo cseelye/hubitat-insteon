@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2022-10-08
+Test release
+* No changes
+
 ## [1.0.0] - 2022-10-08
 Initial release
 * Support for dimmers (switches, plug in modules, micro modules, smart bulbs)
