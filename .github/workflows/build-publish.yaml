@@ -154,6 +154,13 @@ jobs:
         commit_list="${commit_list//$'\r'/'%0D'}"
         echo "::set-output name=commits::${commit_list}"
 
+    # Delete the old prerelease
+    - name: Delete previous prerelease
+      if: "! startsWith(github.ref, 'refs/tags/')"
+      uses: cb80/delrel@v0.11.0
+      with:
+        tag: prerelease
+
     # Create prerelease
     - name: Create prerelease
       if: "! startsWith(github.ref, 'refs/tags/')"
