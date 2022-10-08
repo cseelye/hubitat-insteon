@@ -92,8 +92,8 @@ jobs:
       uses: docker/metadata-action@v3
       with:
         images: |
-          ${{ env.CONTAINER_IMAGE_NAME }}
-          ghcr.io/${{ env.CONTAINER_IMAGE_NAME }}
+          ${{ github.repository_owner }}/${{ env.CONTAINER_IMAGE_NAME }}
+          ghcr.io/${{ github.repository_owner }}/${{ env.CONTAINER_IMAGE_NAME }}
         tags: |
           type=raw,value=${{ env.CONTAINER_TAG }}
         flavor: ${{ env.CONTAINER_FLAVOR }}
