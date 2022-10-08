@@ -13,6 +13,7 @@ jobs:
     env:
       BASE_BUNDLE_NAME: InsteonBridgeDrivers-
       BASE_SERVER_NAME: insteon-bridge-server-
+      CONTAINER_IMAGE_NAME: insteon-bridge
 
     steps:
 
@@ -91,8 +92,8 @@ jobs:
       uses: docker/metadata-action@v3
       with:
         images: |
-          ${{ github.repository }}
-          ghcr.io/${{ github.repository }}
+          ${{ env.CONTAINER_IMAGE_NAME }}
+          ghcr.io/${{ env.CONTAINER_IMAGE_NAME }}
         tags: |
           type=raw,value=${{ env.CONTAINER_TAG }}
         flavor: ${{ env.CONTAINER_FLAVOR }}
